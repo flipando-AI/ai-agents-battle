@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
             llm_config = fetch_model_config(selected_model)
             discussion = GroupDiscussion(llm_config=llm_config)
-            manager = discussion.assemble_groupchat(num_rounds=2)
+            manager = discussion.assemble_groupchat(num_rounds=10)
             manager.initiate_chat(
                 manager, 
                 message=f"""
