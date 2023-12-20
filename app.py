@@ -1,62 +1,54 @@
 import streamlit as st
 
-from src.discussion import GroupDiscussion, fetch_model_config
-from src.prompts import (system_message_analytics_assistant,
-                         system_message_confident_founder,
-                         system_message_shark_partner,
-                         system_message_shy_founder)
+from src.pages import discussion_page, landing_page, setup_page
 from src.styles import styles
-from src.term_sheet import TERM_SHEET
+from src.utils import navigate_to
 
 
+def page_switcher():
+    st.markdown("---")
+    page = st.session_state.current_page
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        if page != "landing":
+            st.button("Home", on_click=navigate_to, args=("landing",), type="secondary", help="Return to the home page")
+    with col2:
+        if page != "setup":
+            st.button("Setup Page", on_click=navigate_to, args=("setup",), type="secondary", help="Go to the discussion setup page")
+    with col3:
+        if page != "discussion":
+            st.button("Discussion Page", on_click=navigate_to, args=("discussion",), type="secondary", help="Go to the discussion chat page")
+    st.markdown("---")
 
+
+# Main Application
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
 
-
     with open("src/style.css") as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-
     st.markdown(styles, unsafe_allow_html=True)
-    st.title("Term-Sheet Negotiation Simulation")
 
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "landing"
+
+    page_switcher()
 
     with st.sidebar:
-        st.header("Agent Configuration")
-        selected_model = st.selectbox("Select Model", ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"], index=1)
-        st.header("Agent Roles")
+        st.session_state.selected_model = st.selectbox(
+            "Select Model", ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"], index=0
+        )
 
-        with st.expander("Laurie - Shark Partner"):
-            st.write(system_message_shark_partner)
-        with st.expander("Monica - Analytics Assistant"):
-            st.write(system_message_analytics_assistant)
-        with st.expander("Flipper - Confident CoFounder"):
-            st.write(system_message_confident_founder)
-        with st.expander("Dwight - Shy CoFounder"):
-            st.write(system_message_shy_founder)
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "setup"
+    if 'default_prompt' not in st.session_state:
+        st.session_state.default_prompt = "Bienvenidos a la negociación del term-sheet! El term-sheet sobre el cual se basará la negociación es el siguiente: "
+    if 'DOCUMENT' not in st.session_state:
+        st.session_state.DOCUMENT = None
 
-    with st.container():
-        if st.button("Kick Off Negotiation", key="start_conversation"):
-            if not selected_model:
-                st.warning(
-                    "You must choose a preferred model", icon="⚠️")
-                st.stop()
-
-            llm_config = fetch_model_config(selected_model)
-            discussion = GroupDiscussion(llm_config=llm_config)
-            manager = discussion.assemble_groupchat(num_rounds=10)
-            manager.initiate_chat(
-                manager, 
-                message=f"""
-                    Welcome to the Term Sheet Negotiation!
-
-                    The term-sheet upon which the negotiation will be based is as follows:
-
-                    ```
-                    {TERM_SHEET}
-                    ```
-
-                    Begin!
-                """
-            )
+    if st.session_state.current_page == "landing":
+        landing_page()
+    elif st.session_state.current_page == "setup":
+        setup_page()
+    elif st.session_state.current_page == "discussion":
+        discussion_page()

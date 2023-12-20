@@ -1,15 +1,11 @@
 import sys
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 import streamlit as st
 from autogen import (Agent, AssistantAgent, GroupChat, GroupChatManager,
                      config_list_from_json)
 
-from src.prompts import (system_message_analytics_assistant,
-                         system_message_chat_manager,
-                         system_message_confident_founder,
-                         system_message_shark_partner,
-                         system_message_shy_founder)
+from src.prompts import system_message_chat_manager
 
 
 class GroupChatManagerPlus(GroupChatManager):
@@ -35,23 +31,22 @@ class GroupChatManagerPlus(GroupChatManager):
         self.register_reply(Agent, GroupChatManager.run_chat, config=groupchat, reset_config=GroupChat.reset)
 
     def _process_received_message(self, message, sender, silent):
-        agent_avatar = {"chat_manager": "", "Flipper": "🦈", "Dwight": "🤓", "Laurie": "💼", "Monica": "📊"}
-        agent_alignment = {"chat_manager": "", "Flipper": "agent-left", "Dwight": "agent-left", "Laurie": "agent-right", "Monica": "agent-right"}
+        agent_alignment = {"Right": "agent-right", "Left": "agent-left"}
 
         if sender.name != "chat_manager":
+            agent_role = next((role for name, prompt, role in st.session_state.agents if name == sender.name), "")
+
             with st.chat_message(sender.name):
-                # Use Flexbox for horizontal alignment
                 st.markdown(
-                    f"<div class='message-row {agent_alignment[sender.name]}'>"
-                    f"<span class='agent-avatar'>{agent_avatar[sender.name]}</span>"
+                    f"<div class='message-row {agent_alignment.get(agent_role, '')}'>"
                     f"<span class='agent-name'>{sender.name}</span>"
                     f"<div class='chat-bubble'>{message}</div>"
                     f"</div>",
                     unsafe_allow_html=True
                 )
-            
+
         return super()._process_received_message(message, sender, silent)
-    
+
 
 def fetch_model_config(model_name: str):
     config_list = config_list_from_json(
@@ -70,43 +65,21 @@ def fetch_model_config(model_name: str):
     }
 
 
-
 class GroupDiscussion:
-    def __init__(self, llm_config: Dict):
+    def __init__(self, agents: List[Tuple[str, str]], llm_config: Dict):
+        self.agents = agents
         self.llm_config = llm_config
 
+    def _init_agent(self, name: str, prompt: str) -> AssistantAgent:
+        return AssistantAgent(
+            name=name,
+            system_message=prompt,
+            llm_config=self.llm_config,
+            is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
+        )
+
     def _assemble_agents(self) -> List[AssistantAgent]:
-        confident_startup_founder = AssistantAgent(
-            name="Flipper",
-            system_message=system_message_confident_founder,
-            llm_config=self.llm_config,
-            is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
-        )
-
-        shy_startup_founder = AssistantAgent(
-            name="Dwight",
-            system_message=system_message_shy_founder,
-            llm_config=self.llm_config,
-            is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
-        )
-
-        vc_partner = AssistantAgent(
-            name="Laurie",
-            system_message=system_message_shark_partner,
-            llm_config=self.llm_config,
-            is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
-            
-        )
-
-        vc_analyst = AssistantAgent(
-            name="Monica",
-            system_message=system_message_analytics_assistant,
-            code_execution_config={"last_n_messages": 3, "work_dir": "groupchat"},
-            llm_config=self.llm_config,
-            is_termination_msg=lambda x: x.get("content", "") and x.get("content", "").rstrip().endswith("TERMINATE"),
-        )
-
-        return [confident_startup_founder, shy_startup_founder, vc_partner, vc_analyst]
+        return [self._init_agent(name, prompt) for name, prompt in self.agents]
     
     def assemble_groupchat(self, num_rounds: int) -> GroupChatManagerPlus:
         agents = self._assemble_agents()
