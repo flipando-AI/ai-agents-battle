@@ -2,3 +2,4 @@ streamlit==1.29.0
 pyautogen===0.1.14
 unstructured[all-docs]
 langchain==0.0.351
+opencv-python
