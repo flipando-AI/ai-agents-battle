@@ -3,3 +3,4 @@ pyautogen===0.1.14
 unstructured[all-docs]
 langchain==0.0.351
 pyautogen[retrievechat]
+chromadb==0.3.29
