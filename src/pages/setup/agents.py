@@ -1,18 +1,6 @@
 import streamlit as st
 
-from src.battle.prompts import (system_message_analytics_assistant,
-                         system_message_confident_founder,
-                         system_message_shark_partner,
-                         system_message_shy_founder)
-
-
-def init_default_agents():
-    return [
-        ("Willy", system_message_shark_partner, "gpt-35-turbo-16k", False, "Right"),
-        ("Monica", system_message_analytics_assistant, "gpt-35-turbo-16k", False, "Right"),
-        ("Flipper", system_message_confident_founder, "gpt-35-turbo-16k", False, "Left"),
-        ("Dwight", system_message_shy_founder, "gpt-35-turbo-16k", False, "Left")
-    ]
+from src.pages.setup.default import default_agents
 
 
 def add_agent():
@@ -26,7 +14,6 @@ def remove_agent(agent_index):
 
 
 def agents_setup():
-    default_agents = init_default_agents()
     if 'agents' not in st.session_state:
         st.session_state.agents = default_agents
 

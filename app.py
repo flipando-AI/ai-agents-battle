@@ -1,9 +1,11 @@
 import streamlit as st
+from dotenv import load_dotenv
 
 from src.pages import discussion_page, landing_page, setup_page
 from src.styles.styles import styles
 from src.utils.utils import navigate_to
 
+load_dotenv()
 
 def page_switcher():
     page = st.session_state.current_page

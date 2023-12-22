@@ -1,39 +1,52 @@
-from typing import List, Tuple
+import os
+from typing import List
 
-from autogen import (AssistantAgent, ConversableAgent, GroupChat,
-                     UserProxyAgent, config_list_from_json)
+from autogen import AssistantAgent, ConversableAgent, GroupChat, UserProxyAgent
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import \
     RetrieveUserProxyAgent
 from chromadb.utils import embedding_functions
 
-from src.battle.components import GroupChatManagerPlus, UserProxyAgentPlus
-from src.battle.prompts import chat_manager_prompt_whi, chat_manager_prompt_wohi
+from src.battle.components import (AgentPlus, GroupChatManagerPlus,
+                                   UserProxyAgentPlus)
+from src.battle.prompts import (chat_manager_prompt_whi,
+                                chat_manager_prompt_wohi)
 
 
 class GroupDiscussion:
-    def __init__(self, agents: List[Tuple[str, str]], extra_knowledge: List[str], human_feedback: bool, model_name: str, seed: int):
+    def __init__(
+        self, 
+        agents: List[AgentPlus], 
+        extra_knowledge: List[str], 
+        human_feedback: bool, 
+        model_name: str, 
+        seed: int
+    ):
         self.agents = agents
         self.seed = seed
         self.extra_knowledge = extra_knowledge
         self.human_feedback = human_feedback
         self.termination_msg = lambda x: isinstance(x, dict) and "TERMINATE" == str(x.get("content", ""))[-9:].upper()
         self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-            api_key="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",
+            api_key=os.getenv("OPENAI_API_KEY"),
             model_name="text-embedding-ada-002"
         )
         self.retriever_assistant = self._create_retriever_assistant()
-        self.llm_config = self.fetch_model_config(model_name)
+        self.llm_config = self._fetch_model_config(model_name)
 
-    def fetch_model_config(self, model_name: str):
+    def _fetch_model_config(self, model_name: str):
         with_retriever = True if self.retriever_assistant else False
-        config_list = config_list_from_json(
-            env_or_file="OAI_CONFIG_LIST", 
-            filter_dict={
-                "model": [
-                    model_name,
-                ]
-            }
-        )
+        if model_name == "gpt-35-turbo-16k":
+            config_list = [
+                {
+                    "model": model_name, 
+                    "api_type": "azure", 
+                    "api_key": os.getenv("AZURE_API_KEY"),
+                    "api_base": os.getenv("AZURE_API_BASE"),
+                    "api_version": os.getenv("AZURE_API_VERSION"),
+                }
+            ]
+        else:
+            config_list = [{"model": model_name, "api_key": os.getenv("OPENAI_API_KEY")}]
 
         llm_config = {
             "request_timeout": 600,
@@ -61,8 +74,7 @@ class GroupDiscussion:
 
         return llm_config
 
-
-    def retrieve_content(self, message, n_results=3):
+    def _retrieve_content(self, message, n_results=3):
             self.retriever_assistant.n_results = n_results
             update_context_case1, update_context_case2 = self.retriever_assistant._check_update_context(message)
             if (update_context_case1 or update_context_case2) and self.retriever_assistant.update_context:
@@ -84,7 +96,7 @@ class GroupDiscussion:
                     "task": "qa",
                     "docs_path": self.extra_knowledge,
                     "embedding_function": self.embedding_function,
-                    "chunk_token_size": 512,
+                    "chunk_token_size": 256,
                     "get_or_create": True
                 },
                 code_execution_config=False,
@@ -92,37 +104,33 @@ class GroupDiscussion:
         else:
             return None
 
-
-    def _init_agent(self, name: str, prompt: str, model: str, code_execution: bool) -> AssistantAgent:
-        prompt = f"{prompt}\n\n\nNote: Do not start your messages stating your name, the agents already know who you are. Its crucial that you respond your plain message alone"
-        if code_execution:
+    def _init_agent(self, agent: AgentPlus) -> AssistantAgent:
+        prompt = f"{agent.prompt}\n\n\nNote: Do not start your messages stating your name, the agents already know who you are. Its crucial that you respond your plain message alone"
+        if agent.code_execution:
             return UserProxyAgent(
-                name=name,
+                name=agent.name,
                 system_message=prompt,
                 code_execution_config={"last_n_messages": 2, "work_dir": "groupchat"},
                 human_input_mode="NEVER",
                 is_termination_msg=self.termination_msg,
-                llm_config=self.fetch_model_config(model),
+                llm_config=self._fetch_model_config(agent.model),
             )
 
         else:
             return AssistantAgent(
-                name=name,
+                name=agent.name,
                 system_message=prompt,
-                llm_config=self.fetch_model_config(model),
+                llm_config=self._fetch_model_config(agent.model),
                 is_termination_msg=self.termination_msg
             )
 
     def _assemble_agents(self) -> List[AssistantAgent]:
-        agents = [
-            self._init_agent(name, prompt, model, code_execution) for name, prompt, model, code_execution in self.agents
-        ]
-
+        agents = [self._init_agent(agent) for agent in self.agents]
         if self.retriever_assistant:
             for agent in agents:
                 agent.register_function(
                     function_map={
-                        "retrieve_content": self.retrieve_content,
+                        "retrieve_content": self._retrieve_content,
                     }
                 )
 
@@ -149,7 +157,7 @@ class GroupDiscussion:
         if self.retriever_assistant:
             user_proxy.register_function(
                 function_map={
-                    "retrieve_content": self.retrieve_content,
+                    "retrieve_content": self._retrieve_content,
                 }
             )
 

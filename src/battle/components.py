@@ -1,10 +1,18 @@
-import random
 import re
 import sys
 from typing import Callable, Dict, Optional, Union
 
 import streamlit as st
-from autogen import GroupChat, GroupChatManager, Agent, ConversableAgent
+from autogen import Agent, ConversableAgent, GroupChat, GroupChatManager
+from pydantic import BaseModel
+
+
+class AgentPlus(BaseModel):
+    name: str
+    prompt: str
+    model: str
+    code_execution: bool
+    chat_side: str
 
 
 class GroupChatManagerPlus(GroupChatManager):
@@ -29,11 +37,15 @@ class GroupChatManagerPlus(GroupChatManager):
         )
         self.register_reply(Agent, GroupChatManager.run_chat, config=groupchat, reset_config=GroupChat.reset)
 
-    def _get_text_color(self, bg_color):
-        """Calculate the luminance of the background color and return a suitable text color."""
-        r, g, b = int(bg_color[1:3], 16), int(bg_color[3:5], 16), int(bg_color[5:7], 16)
-        luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-        return 'white' if luminance < 0.5 else 'black'
+    def _fetch_agent_color(self, agent_name: str) -> str:
+        chat_side = ""
+        bkg_color = ""
+        txt_color = ""
+        for tup in st.session_state.agents:
+            if tup[0] == agent_name:
+                chat_side, bkg_color, txt_color =  tup[4], tup[5], tup[6]
+
+        return chat_side, bkg_color, txt_color
 
     def _sanitize_message(self, message: str, agent_name: str) -> str:
         pattern = re.compile(rf"^{re.escape(agent_name)}:?\s*", re.IGNORECASE)
@@ -46,7 +58,7 @@ class GroupChatManagerPlus(GroupChatManager):
         if isinstance(message, str):
             message = self._sanitize_message(message, sender.name)
             if sender.name != "chat_manager":
-                agent_role = next((role for name, _, _, _, role in st.session_state.agents if name == sender.name), "")
+                agent_side, bkg_color, txt_color = self._fetch_agent_color(sender.name)
                 if sender.name == "USER":
                     if message:
                         with st.chat_message(sender.name):
@@ -58,14 +70,11 @@ class GroupChatManagerPlus(GroupChatManager):
                             )
 
                 else:
-                    random_color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
-                    text_color = self._get_text_color(random_color)
-
                     with st.chat_message(sender.name):
                         st.markdown(
-                            f"<div class='message-row {agent_alignment.get(agent_role, '')}'>"
+                            f"<div class='message-row {agent_alignment.get(agent_side, '')}'>"
                             f"<span class='agent-name'>{sender.name}</span>"
-                            f"<div class='chat-bubble' style='background-color: {random_color}; color: {text_color};'>{message}</div>"
+                            f"<div class='chat-bubble' style='background-color: {bkg_color}; color: {txt_color};'>{message}</div>"
                             f"</div>",
                             unsafe_allow_html=True
                         )
