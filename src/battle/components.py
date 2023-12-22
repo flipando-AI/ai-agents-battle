@@ -36,9 +36,6 @@ class GroupChatManagerPlus(GroupChatManager):
         return 'white' if luminance < 0.5 else 'black'
 
     def _sanitize_message(self, message: str, agent_name: str) -> str:
-        print('\n\nmessage: ', message)
-        print('\n\nagent_name: ', agent_name)
-
         pattern = re.compile(rf"^{re.escape(agent_name)}:?\s*", re.IGNORECASE)
         sanitized_message = re.sub(pattern, '', message)
         

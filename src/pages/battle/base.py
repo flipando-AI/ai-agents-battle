@@ -24,11 +24,10 @@ def discussion_page():
             for name, prompt, model, code_execution, _ in st.session_state.agents
         ]
 
-        human_feedback = st.session_state.human_feedback == "ALWAYS"
         discussion = GroupDiscussion(
             agents=agent_data, 
             extra_knowledge=st.session_state.knowledge, 
-            human_feedback=human_feedback,
+            human_feedback=st.session_state.human_feedback,
             model_name=st.session_state.manager_model
         )
         user_proxy, manager = discussion.assemble_groupchat(num_rounds=st.session_state.num_rounds)
