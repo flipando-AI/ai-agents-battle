@@ -1,3 +1,3 @@
-from src.pages.discussion import discussion_page
-from src.pages.landing import landing_page
-from src.pages.setup import setup_page
+from src.pages.battle.base import discussion_page
+from src.pages.landing.base import landing_page
+from src.pages.setup.base import setup_page

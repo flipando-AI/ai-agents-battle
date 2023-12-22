@@ -1,12 +1,11 @@
 import streamlit as st
 
 from src.pages import discussion_page, landing_page, setup_page
-from src.styles import styles
-from src.utils import navigate_to
+from src.styles.styles import styles
+from src.utils.utils import navigate_to
 
 
 def page_switcher():
-    st.markdown("---")
     page = st.session_state.current_page
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
@@ -17,15 +16,15 @@ def page_switcher():
             st.button("Setup Page", on_click=navigate_to, args=("setup",), type="secondary", help="Go to the discussion setup page")
     with col3:
         if page != "discussion":
-            st.button("Discussion Page", on_click=navigate_to, args=("discussion",), type="secondary", help="Go to the discussion chat page")
-    st.markdown("---")
+            st.button("Chat Battlefield Page", on_click=navigate_to, args=("discussion",), type="secondary", help="Go to the discussion chat page")
 
+    st.divider()
 
 # Main Application
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
 
-    with open("src/style.css") as f:
+    with open("src/styles/style.css") as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     st.markdown(styles, unsafe_allow_html=True)
 
@@ -35,9 +34,11 @@ if __name__ == "__main__":
     page_switcher()
 
     with st.sidebar:
-        st.session_state.selected_model = st.selectbox(
-            "Select Model", ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"], index=0
+        st.session_state.manager_model = st.selectbox(
+            "Select Model", ["gpt-35-turbo-16k", "gpt-3.5-turbo-1106", "gpt-4-1106-preview"], index=0, help="Select the AI model to use for the Chat Manager"
         )
+        st.session_state.num_rounds = st.number_input("Number of Rounds", min_value=1, max_value=100, value=10, step=1, help="Number of rounds for the discussion")
+        st.session_state.human_feedback = st.selectbox("Human Intervention", ["ALWAYS", "NEVER"], index=1, help="Whether to ask for human feedback during the conversation to steer the discussion in the right direction")
 
     if 'current_page' not in st.session_state:
         st.session_state.current_page = "setup"

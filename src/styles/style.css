@@ -1,0 +1,95 @@
+/* style.css */
+.agent-config {
+    margin-bottom: 2rem; /* Adds space between each agent config */
+}
+
+.subheader {
+    margin-top: 2rem; /* Adds space above the subheader */
+    margin-bottom: 1rem; /* Adds space below the subheader */
+}
+
+/* You can also adjust the top margin of the first element after subheaders if needed */
+.subheader + * {
+    margin-top: 1rem;
+}
+
+
+.chat-bubble {
+    padding: 10px 20px;
+    border-radius: 40px;
+    margin: 10px;
+    display: inline-block;
+    opacity: 0.5;
+    max-width: 60%; /* Set a max-width for the bubbles */
+}
+
+.user-message {
+    display: flex; /* Use flexbox to center the child elements */
+    justify-content: center; /* Center horizontally in the container */
+    align-items: center; /* Center vertically in the container */
+    width: 100%; /* Full width to ensure the flex container takes up all the space */
+    margin: 10px 0; /* Spacing */
+}
+
+.user-message .chat-bubble {
+    background-color: #f0f0f0; /* Light grey background */
+    opacity: 0.5;
+    color: #333; /* Darker text for contrast */
+    text-align: center; /* Center the text within the bubble */
+    width: auto; /* Let the width be as wide as the content */
+    max-width: 100%; /* Maximum width to ensure it doesn't overflow the container */
+    border-radius: 0; /* Differentiate from agent messages */
+    padding: 10px; /* Padding inside the bubble */
+}
+
+.agent-left .chat-bubble {
+    background-color: #e0e0e0;
+    float: left;
+}
+
+.agent-right .chat-bubble {
+    background-color: #0084ff;
+    color: white;
+    float: right;
+}
+
+.chat-message {
+    overflow: auto;
+}
+
+.agent-name {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.agent-left .chat-bubble::after {
+    content: '';
+    position: absolute;
+    border: 15px solid transparent;
+    border-top-color: #e0e0e0;
+    left: 0;
+    bottom: 0;
+    transform: translate(-100%, 50%);
+}
+
+.agent-right .chat-bubble::after {
+    content: '';
+    position: absolute;
+    border: 15px solid transparent;
+    border-top-color: #0084ff;
+    right: 0;
+    bottom: 0;
+    transform: translate(100%, 50%);
+}
+
+.waiting-input {
+    font-weight: bold;
+    color: #004d00;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    border-top: 1px dashed #004d00;
+    border-bottom: 1px dashed #004d00;
+    padding: 5px 0;
+}

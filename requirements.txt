@@ -3,3 +3,4 @@ pyautogen===0.1.14
 unstructured[all-docs]
 langchain==0.0.351
 opencv-python
+pyautogen[retrievechat]
