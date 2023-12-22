@@ -39,6 +39,7 @@ if __name__ == "__main__":
         )
         st.session_state.num_rounds = st.number_input("Number of Rounds", min_value=1, max_value=100, value=10, step=1, help="Number of rounds for the discussion")
         st.session_state.human_feedback = st.toggle("Human Intervention", value=False, help="Whether to ask for human feedback during the conversation to steer the discussion in the right direction", disabled=True)
+        st.session_state.seed = st.number_input("Seed", min_value=0, max_value=1000, value=42, step=1, help="Seed for caching the model results. Useful to reproduce the same results across multiple runs with the same prompts.")
 
     if 'current_page' not in st.session_state:
         st.session_state.current_page = "setup"

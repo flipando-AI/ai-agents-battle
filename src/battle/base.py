@@ -11,8 +11,9 @@ from src.battle.prompts import chat_manager_prompt_whi, chat_manager_prompt_wohi
 
 
 class GroupDiscussion:
-    def __init__(self, agents: List[Tuple[str, str]], extra_knowledge: List[str], human_feedback: bool, model_name: str):
+    def __init__(self, agents: List[Tuple[str, str]], extra_knowledge: List[str], human_feedback: bool, model_name: str, seed: int):
         self.agents = agents
+        self.seed = seed
         self.extra_knowledge = extra_knowledge
         self.human_feedback = human_feedback
         self.termination_msg = lambda x: isinstance(x, dict) and "TERMINATE" == str(x.get("content", ""))[-9:].upper()
@@ -37,7 +38,7 @@ class GroupDiscussion:
         llm_config = {
             "request_timeout": 600,
             "config_list": config_list,
-            "seed": 43,
+            "seed": self.seed,
         }
 
         if with_retriever:
@@ -164,8 +165,6 @@ class GroupDiscussion:
             max_round=num_rounds
         )
         manager_prompt = chat_manager_prompt_whi if self.human_feedback else chat_manager_prompt_wohi
-
-        print('\n\n\n\nchat manager message: ', manager_prompt)
         manager = GroupChatManagerPlus(
             name="chat_manager",
             groupchat=groupchat, 

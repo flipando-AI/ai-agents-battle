@@ -28,7 +28,8 @@ def discussion_page():
             agents=agent_data, 
             extra_knowledge=st.session_state.knowledge, 
             human_feedback=st.session_state.human_feedback,
-            model_name=st.session_state.manager_model
+            model_name=st.session_state.manager_model,
+            seed=st.session_state.seed,
         )
         user_proxy, manager = discussion.assemble_groupchat(num_rounds=st.session_state.num_rounds)
         message = f"{st.session_state.default_prompt}\n\n\n<Document context>\n\n{st.session_state.DOCUMENT}\n\nBegin!" if st.session_state.DOCUMENT else f"{st.session_state.default_prompt}\n\nBegin!"
