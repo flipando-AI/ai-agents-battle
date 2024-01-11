@@ -25,7 +25,7 @@ def agents_setup():
         with col1:
             agent_name = st.text_input("Agent Name", agent[0], key=f"name_{i}")
             agent_model = st.selectbox(
-                "Model", ["gpt-35-turbo-16k", "gpt-3.5-turbo-1106", "gpt-4-1106-preview"], index=0, key=f"model_{i}", help="Select the AI model to use for this agent"
+                "Model", ["gpt-35-turbo-16k", "gpt-3.5-turbo-1106", "gpt-4-1106-preview"], index=2, key=f"model_{i}", help="Select the AI model to use for this agent"
             )
             code_execution = st.checkbox("Enable Code Execution", key=f"code_{i}", help="Enable code execution for this agent")
             agent_chat_side = st.selectbox(

@@ -16,7 +16,7 @@ def purpose_setup():
     st.divider()
     # Additional Documents Sub-Section
     st.subheader("Additional Documents to discuss upon", help="Any document uploaded here will be incorporated right after the goal/purpose of the discussion that is displayed to the agents.")
-    doc_upload = st.file_uploader("Upload Document (i.e.: term sheet)", type=['txt', 'pdf', 'docx'], accept_multiple_files=False)
+    doc_upload = st.file_uploader("Upload Document (i.e.: term sheet)", type=['txt', 'docx'], accept_multiple_files=False)
     if doc_upload is not None:
         st.session_state.DOCUMENT = load_document(BytesIO(doc_upload.read()))
         additional_docs_expander = st.expander("Document Preview", expanded=True)
