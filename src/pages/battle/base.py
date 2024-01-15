@@ -40,6 +40,10 @@ def discussion_page():
     st.write("This is the stage where your configured agents will engage in the negotiation based on the setup parameters you've provided. Initiate the discussion and observe how the agents interact with each other to achieve the set goals.")
 
     if st.button("Kick Off Battle", key="start_conversation", type="primary", help="Start the discussion"):
+        if not st.session_state.api_key:
+            st.warning("Please enter your OpenAI API Key.", icon="⚠️")
+            st.stop()
+        
         if not st.session_state.manager_model:
             st.warning("Please select a preferred AI model.", icon="⚠️")
             st.stop()
@@ -58,7 +62,7 @@ def discussion_page():
             seed=st.session_state.seed,
         )
         user_proxy, manager = discussion.assemble_groupchat(num_rounds=st.session_state.num_rounds)
-        message = f"{st.session_state.default_prompt}\n\n\n<Document context>\n\n{st.session_state.DOCUMENT}\n\nBegin!" if st.session_state.DOCUMENT else f"{st.session_state.default_prompt}\n\nBegin!"
+        message = f"{st.session_state.default_prompt}\n\n\n\n<Document context>\n\n{st.session_state.DOCUMENT}\n</Document context>\n\n\nBegin Discussion!" if st.session_state.DOCUMENT else f"{st.session_state.default_prompt}\n\n\nBegin Discussion!"
         user_proxy.initiate_chat(manager, message=message)
 
         st.button("Back to Setup Page", on_click=navigate_to, args=("setup",), type="secondary", help="Return to the setup page")

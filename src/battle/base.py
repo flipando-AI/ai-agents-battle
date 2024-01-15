@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import streamlit as st
 from autogen import AssistantAgent, ConversableAgent, GroupChat, UserProxyAgent
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import \
     RetrieveUserProxyAgent
@@ -27,7 +28,7 @@ class GroupDiscussion:
         self.human_feedback = human_feedback
         self.termination_msg = lambda x: isinstance(x, dict) and "TERMINATE" == str(x.get("content", ""))[-9:].upper()
         self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=st.session_state.api_key,
             model_name="text-embedding-ada-002"
         )
         self.retriever_assistant = self._create_retriever_assistant()
@@ -46,7 +47,7 @@ class GroupDiscussion:
                 }
             ]
         else:
-            config_list = [{"model": model_name, "api_key": os.getenv("OPENAI_API_KEY")}]
+            config_list = [{"model": model_name, "api_key": st.session_state.api_key}]
 
         llm_config = {
             "request_timeout": 600,
