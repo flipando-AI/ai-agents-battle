@@ -109,4 +109,4 @@ You can find the AI Agents Battle app deployed at https://ai-agents-battle.strea
 ## Copyright
 ©Flipando.ai - All rights reserved.
 
-[Flipando.ai Logo](https://assets-global.website-files.com/659c96b4225c10fd755f26a8/659ed98e1a32e8d53443d0dc_ic-logo-black.svg)
+![Flipando.ai Logo](https://assets-global.website-files.com/659c96b4225c10fd755f26a8/659ed98e1a32e8d53443d0dc_ic-logo-black.svg)
