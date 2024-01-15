@@ -41,7 +41,7 @@ AI Chat Battlefield Page
 
 Sidebar Features
 - **Model Selection**: GPT-4 is recommended for the Chat Manager for its advanced capabilities.
-- **API Key**: Essential for model requests.
+- **API Key**: Essential for model requests. Get yours [here] (https://platform.openai.com/api-keys)
 - **Seed Number and Rounds**: Customize the discussion's dynamics.
 
 Example Prompts
