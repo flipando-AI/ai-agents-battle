@@ -102,5 +102,6 @@ AI Agents Battle, a Streamlit-powered simulation platform, uses Microsoft's Auto
 Learn more about the [Microsoft Autogen framework](https://microsoft.github.io/autogen/).
 
 
+## Copyright
 ©Flipando.ai - All rights reserved.
 ![Flipando.ai Logo](https://assets-global.website-files.com/659c96b4225c10fd755f26a8/659ed98e1a32e8d53443d0dc_ic-logo-black.svg)
