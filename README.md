@@ -16,7 +16,7 @@ AI Agents Battle, a Streamlit-powered simulation platform, uses Microsoft's Auto
 ## Installation and Setup
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/flipando-AI/punta-tech
+   git clone https://github.com/flipando-AI/ai-agents-battle
    ```
 
 2. **Install Dependencies**:
